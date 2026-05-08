@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Layout } from "../components/Layout";
 import { StatCard } from "../components/StatCard";
@@ -54,25 +54,17 @@ function formatTimeOnly(dateIso) {
 }
 
 export function DashboardPage() {
-  const { transactions, loading, error, dashboardTotals } = useAppData();
+  const { transactions, loading, error } = useAppData();
   const [selectedDateKey, setSelectedDateKey] = useState("");
   const now = getDubaiNow();
   const activeMonth = now.startOf("month");
 
   const todayStats = useMemo(() => {
-    if (dashboardTotals && Number(dashboardTotals.today_income || 0) > 0) {
-      return {
-        income: Number(dashboardTotals.today_income || 0),
-        expenses: Number(dashboardTotals.today_expenses || 0),
-        balance: Number(dashboardTotals.today_balance || 0),
-        count: 0,
-      };
-    }
     const todayTransactions = transactions.filter((item) =>
       isDateInPeriod(item.transaction_at, "today")
     );
     return summarize(todayTransactions);
-  }, [dashboardTotals, transactions]);
+  }, [transactions]);
 
   const monthStats = useMemo(() => {
     const monthTransactions = transactions.filter((item) =>
@@ -89,6 +81,14 @@ export function DashboardPage() {
       }),
     [activeMonth, transactions]
   );
+
+  useEffect(() => {
+    if (selectedDateKey || monthTransactions.length === 0) return;
+    const firstDate = toDubaiDateTime(monthTransactions[0].transaction_at);
+    if (firstDate) {
+      setSelectedDateKey(firstDate.toFormat("yyyy-LL-dd"));
+    }
+  }, [monthTransactions, selectedDateKey]);
 
   const byDay = useMemo(() => {
     const map = new Map();
@@ -130,6 +130,7 @@ export function DashboardPage() {
     () => selectedDayTransactions.filter((item) => item.type === "income"),
     [selectedDayTransactions]
   );
+  const latestSelectedDayTransaction = selectedDayTransactions[0] || null;
 
   return (
     <Layout title="Dashboard" subtitle="Monthly business performance calendar">
@@ -315,6 +316,36 @@ export function DashboardPage() {
 
         {selectedDateKey ? (
           <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2">
+            <article className="rounded-xl border border-slate-200 bg-slate-50 p-3 md:col-span-2">
+              <h3 className="text-sm font-semibold text-slate-800">Latest saved transaction</h3>
+              {latestSelectedDayTransaction ? (
+                <div className="mt-2 text-sm text-slate-700">
+                  <p className="font-semibold">
+                    {latestSelectedDayTransaction.category?.name || "Uncategorized"} -{" "}
+                    {formatCurrency(latestSelectedDayTransaction.amount)}
+                  </p>
+                  <p className="text-xs text-slate-600">
+                    Time: {formatTimeOnly(latestSelectedDayTransaction.transaction_at)}
+                  </p>
+                  <p className="text-xs text-slate-600">
+                    Added By:{" "}
+                    {latestSelectedDayTransaction.added_by ||
+                      latestSelectedDayTransaction.entered_by_name ||
+                      "-"}
+                  </p>
+                  {latestSelectedDayTransaction.note ? (
+                    <p className="text-xs text-slate-600">
+                      Note: {latestSelectedDayTransaction.note}
+                    </p>
+                  ) : null}
+                </div>
+              ) : (
+                <p className="mt-2 text-sm text-slate-500">
+                  No saved transactions for this selected day.
+                </p>
+              )}
+            </article>
+
             <article className="rounded-xl border border-rose-200 bg-rose-50/50 p-3">
               <h3 className="text-sm font-semibold text-rose-700">
                 Expenses ({selectedDayExpenses.length})

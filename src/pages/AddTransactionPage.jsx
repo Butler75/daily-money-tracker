@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Layout } from "../components/Layout";
 import { EXPENSE_ADDED_BY_OPTIONS } from "../constants";
 import { useAppData } from "../context/AppDataContext";
@@ -14,7 +15,8 @@ function getNowLocalISOString() {
 }
 
 export function AddTransactionPage() {
-  const { categories, addTransaction } = useAppData();
+  const { categories, addTransaction, loadData } = useAppData();
+  const navigate = useNavigate();
   const amountInputRef = useRef(null);
   const formRef = useRef(null);
   const successTimerRef = useRef(null);
@@ -110,6 +112,7 @@ export function AddTransactionPage() {
         created_at: new Date().toISOString(),
         transaction_at: dubaiDateTimeInputToUtcIso(form.transaction_at),
       });
+      await loadData();
       setShowSuccess(true);
       resetForm();
       amountInputRef.current?.focus();
@@ -117,13 +120,14 @@ export function AddTransactionPage() {
       if (successTimerRef.current) clearTimeout(successTimerRef.current);
       successTimerRef.current = setTimeout(() => {
         setShowSuccess(false);
+        navigate("/");
       }, 1200);
     } catch (err) {
       setError(err.message || "Failed to add transaction");
     } finally {
       setSaving(false);
     }
-  }, [addTransaction, form, hasValidAddedBy, hasValidAmount, hasValidCategory, saving]);
+  }, [addTransaction, form, hasValidAddedBy, hasValidAmount, hasValidCategory, loadData, navigate, saving]);
 
   async function handleSubmit(event) {
     event.preventDefault();
