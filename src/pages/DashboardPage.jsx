@@ -67,15 +67,10 @@ export function DashboardPage() {
     setLoading(true);
     setError("");
 
-    const monthStartUtc = activeMonth.startOf("month").setZone("utc").toISO();
-    const monthEndUtc = activeMonth.endOf("month").setZone("utc").toISO();
-
     const { data, error: queryError } = await supabase
       .schema("public")
       .from("transactions")
-      .select("*, category:categories(name,type)")
-      .gte("transaction_at", monthStartUtc)
-      .lte("transaction_at", monthEndUtc)
+      .select("id,type,amount,payment_method,note,transaction_at,entered_by_name,categories(name)")
       .order("transaction_at", { ascending: false });
 
     if (queryError) {
@@ -87,7 +82,7 @@ export function DashboardPage() {
 
     setTransactions(data || []);
     setLoading(false);
-  }, [activeMonth]);
+  }, []);
 
   useEffect(() => {
     fetchDashboardTransactions();
@@ -358,7 +353,7 @@ export function DashboardPage() {
               {latestSelectedDayTransaction ? (
                 <div className="mt-2 text-sm text-slate-700">
                   <p className="font-semibold">
-                    {latestSelectedDayTransaction.category?.name || "Uncategorized"} -{" "}
+                    {latestSelectedDayTransaction.categories?.name || "Uncategorized"} -{" "}
                     {formatCurrency(latestSelectedDayTransaction.amount)}
                   </p>
                   <p className="text-xs text-slate-600">
@@ -394,7 +389,7 @@ export function DashboardPage() {
                   {selectedDayExpenses.map((item, index) => (
                     <li key={item.id} className="rounded-lg border border-rose-100 bg-white p-2 text-sm">
                       <p className="font-semibold text-slate-800">
-                        {index + 1}. {item.category?.name || "Uncategorized"} -{" "}
+                        {index + 1}. {item.categories?.name || "Uncategorized"} -{" "}
                         <span className="text-rose-700">{formatCurrency(item.amount)}</span>
                       </p>
                       <p className="text-xs text-slate-600">Time: {formatTimeOnly(item.transaction_at)}</p>
@@ -422,7 +417,7 @@ export function DashboardPage() {
                       className="rounded-lg border border-emerald-100 bg-white p-2 text-sm"
                     >
                       <p className="font-semibold text-slate-800">
-                        {index + 1}. {item.category?.name || "Uncategorized"} -{" "}
+                        {index + 1}. {item.categories?.name || "Uncategorized"} -{" "}
                         <span className="text-emerald-700">{formatCurrency(item.amount)}</span>
                       </p>
                       <p className="text-xs text-slate-600">Time: {formatTimeOnly(item.transaction_at)}</p>
