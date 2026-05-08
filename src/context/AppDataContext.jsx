@@ -425,12 +425,21 @@ export function AppDataProvider({ children }) {
 
   const addTransaction = useCallback(
     async (payload) => {
+      const person = payload.added_by || payload.person || null;
       const dataToInsert = {
-        ...payload,
-        payment_method: "Not Used",
+        amount: Number(payload.amount),
+        type: payload.type,
+        category_id: payload.category_id || payload.category || null,
+        added_by: person,
+        payment_method: payload.payment_method || "Not Used",
+        note: payload.note || "",
+        created_at: payload.created_at || new Date().toISOString(),
+        transaction_at: payload.transaction_at,
         entered_by: user.id,
         entered_by_name: profile?.full_name || user.email,
       };
+      console.log("[addTransaction] insert payload", dataToInsert);
+
       const legacyInsert = await supabase.from("transactions").insert(dataToInsert);
       if (legacyInsert.error) {
         const modernInsert = await supabase.from("transactions").insert({

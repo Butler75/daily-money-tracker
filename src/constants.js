@@ -1,4 +1,5 @@
 export const EXPENSE_ADDED_BY_OPTIONS = ["YASSAR", "ALEX"];
+export const PAYMENT_METHOD_OPTIONS = ["cash", "card", "bank", "online", "other"];
 
 export const DEFAULT_CATEGORIES = [
   { name: "House Rent", type: "income" },
