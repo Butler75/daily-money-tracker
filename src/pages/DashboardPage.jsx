@@ -207,14 +207,12 @@ export function DashboardPage() {
           label="Today Surplus / Deficit"
           value={todayStats.balance}
           tone={todayStats.balance >= 0 ? "positive" : "negative"}
-          signed
           valueClassName="text-lg md:text-3xl"
         />
         <StatCard
           label="Month-to-date Surplus / Deficit"
           value={monthStats.balance}
           tone={monthStats.balance >= 0 ? "positive" : "negative"}
-          signed
           valueClassName="text-lg md:text-3xl"
         />
         <StatCard
@@ -293,10 +291,10 @@ export function DashboardPage() {
               >
                 <p className="text-xs font-semibold text-slate-800">{cell.date.day}</p>
                 <p className="mt-1 text-[10px] font-medium text-emerald-600 md:text-xs">
-                  <CurrencyText value={summary.income} showPlus codeClassName="text-emerald-700" />
+                  <CurrencyText value={summary.income} codeClassName="text-emerald-700" />
                 </p>
                 <p className="text-[10px] font-medium text-rose-600 md:text-xs">
-                  <CurrencyText value={summary.expenses} forceMinus codeClassName="text-rose-700" />
+                  <CurrencyText value={summary.expenses} codeClassName="text-rose-700" />
                 </p>
                 <p
                   className={`text-[10px] font-semibold md:text-xs ${
@@ -305,7 +303,6 @@ export function DashboardPage() {
                 >
                   <CurrencyText
                     value={summary.balance}
-                    showPlus={summary.balance > 0}
                     codeClassName={summary.balance >= 0 ? "text-emerald-700" : "text-rose-700"}
                   />
                 </p>
@@ -329,7 +326,6 @@ export function DashboardPage() {
                     Net:{" "}
                     <CurrencyText
                       value={summary.balance}
-                      showPlus={summary.balance > 0}
                       codeClassName={summary.balance >= 0 ? "text-emerald-700" : "text-rose-700"}
                     />
                   </p>
@@ -385,7 +381,6 @@ export function DashboardPage() {
               >
                 <CurrencyText
                   value={selectedDaySummary.balance}
-                  showPlus={selectedDaySummary.balance > 0}
                   codeClassName={selectedDaySummary.balance >= 0 ? "text-emerald-700" : "text-rose-700"}
                 />
               </p>

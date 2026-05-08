@@ -324,7 +324,6 @@ export function ReportsPage() {
           >
             <CurrencyText
               value={report.net}
-              showPlus={report.net > 0}
               codeClassName={report.net >= 0 ? "text-emerald-700" : "text-rose-700"}
             />
           </p>
@@ -349,7 +348,6 @@ export function ReportsPage() {
               <p className={item.total >= 0 ? "font-semibold text-emerald-700" : "font-semibold text-rose-700"}>
                 <CurrencyText
                   value={item.total}
-                  showPlus={item.total > 0}
                   codeClassName={item.total >= 0 ? "text-emerald-700" : "text-rose-700"}
                 />
               </p>
@@ -379,7 +377,6 @@ export function ReportsPage() {
               <p className={item.net >= 0 ? "font-semibold text-emerald-700" : "font-semibold text-rose-700"}>
                 <CurrencyText
                   value={item.net}
-                  showPlus={item.net > 0}
                   codeClassName={item.net >= 0 ? "text-emerald-700" : "text-rose-700"}
                 />
               </p>
@@ -401,7 +398,6 @@ export function ReportsPage() {
                 <span className={item.net >= 0 ? "font-semibold text-emerald-700" : "font-semibold text-rose-700"}>
                   <CurrencyText
                     value={item.net}
-                    showPlus={item.net > 0}
                     codeClassName={item.net >= 0 ? "text-emerald-700" : "text-rose-700"}
                   />
                 </span>

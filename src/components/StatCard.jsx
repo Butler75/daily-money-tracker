@@ -4,7 +4,6 @@ export function StatCard({
   label,
   value,
   tone = "neutral",
-  signed = false,
   valueClassName = "",
 }) {
   const toneClasses = {
@@ -19,7 +18,6 @@ export function StatCard({
       <p className="card-title">{label}</p>
       <CurrencyText
         value={numericValue}
-        showPlus={signed}
         className={`mt-2 inline-block text-xl font-extrabold md:text-3xl ${toneClasses[tone]} ${valueClassName}`}
       />
     </article>

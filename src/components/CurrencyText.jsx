@@ -8,17 +8,9 @@ export function CurrencyText({
   value,
   className = "",
   codeClassName = "",
-  showPlus = false,
-  forceMinus = false,
 }) {
   const numeric = Number(value || 0);
-  const sign = forceMinus
-    ? "-"
-    : numeric < 0
-      ? "-"
-      : showPlus && numeric > 0
-        ? "+"
-        : "";
+  const sign = numeric < 0 ? "-" : "";
 
   return (
     <span className={className}>
