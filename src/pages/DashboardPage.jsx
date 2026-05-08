@@ -53,6 +53,21 @@ function formatTimeOnly(dateIso) {
   return dt.toFormat("hh:mm a");
 }
 
+function getPersonLabel(item) {
+  return (item.added_by || item.entered_by_name || "-").toUpperCase();
+}
+
+function getPersonBadgeClass(item) {
+  const person = getPersonLabel(item);
+  if (person.includes("YASSAR")) {
+    return "bg-blue-50 text-blue-700 ring-blue-200";
+  }
+  if (person.includes("ALEX")) {
+    return "bg-emerald-50 text-emerald-700 ring-emerald-200";
+  }
+  return "bg-slate-100 text-slate-700 ring-slate-200";
+}
+
 export function DashboardPage() {
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -363,7 +378,7 @@ export function DashboardPage() {
         ) : null}
 
         {selectedDateKey ? (
-          <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2">
+          <div className="mt-4 grid grid-cols-2 gap-2">
             <article className="rounded-xl border border-slate-200 bg-slate-50 p-3 md:col-span-2">
               <h3 className="text-sm font-semibold text-slate-800">Latest saved transaction</h3>
               {latestSelectedDayTransaction ? (
@@ -395,24 +410,29 @@ export function DashboardPage() {
             </article>
 
             <article className="rounded-xl border border-rose-200 bg-rose-50/50 p-3">
-              <h3 className="text-sm font-semibold text-rose-700">
+              <h3 className="text-xs font-semibold text-rose-700 md:text-sm">
                 Expenses ({selectedDayExpenses.length})
               </h3>
               {selectedDayExpenses.length === 0 ? (
-                <p className="mt-2 text-sm text-slate-500">No expenses for this day.</p>
+                <p className="mt-2 text-xs text-slate-500 md:text-sm">No expenses for this day.</p>
               ) : (
-                <ol className="mt-2 space-y-2">
+                <ol className="mt-2 space-y-1.5">
                   {selectedDayExpenses.map((item, index) => (
-                    <li key={item.id} className="rounded-lg border border-rose-100 bg-white p-2 text-sm">
-                      <p className="font-semibold text-slate-800">
-                        {index + 1}. {item.categories?.name || "Uncategorized"} -{" "}
-                        <span className="text-rose-700">{formatCurrency(item.amount)}</span>
+                    <li key={item.id} className="rounded-lg border border-rose-100 bg-white p-2 text-xs">
+                      <p className="font-semibold text-rose-700">{formatCurrency(item.amount)}</p>
+                      <p className="mt-0.5 font-medium text-slate-800">
+                        {index + 1}. {item.categories?.name || "Uncategorized"}
                       </p>
-                      <p className="text-xs text-slate-600">Time: {formatTimeOnly(item.transaction_at)}</p>
-                      <p className="text-xs text-slate-600">
-                        Added By: {item.added_by || item.entered_by_name || "-"}
-                      </p>
-                      {item.note ? <p className="text-xs text-slate-600">Note: {item.note}</p> : null}
+                      <div className="mt-1 flex flex-wrap items-center gap-1">
+                        <span
+                          className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold ring-1 ${getPersonBadgeClass(item)}`}
+                        >
+                          {getPersonLabel(item)}
+                        </span>
+                        <span className="text-[10px] text-slate-500">
+                          {formatTimeOnly(item.transaction_at)}
+                        </span>
+                      </div>
                     </li>
                   ))}
                 </ol>
@@ -420,27 +440,32 @@ export function DashboardPage() {
             </article>
 
             <article className="rounded-xl border border-emerald-200 bg-emerald-50/50 p-3">
-              <h3 className="text-sm font-semibold text-emerald-700">
+              <h3 className="text-xs font-semibold text-emerald-700 md:text-sm">
                 Income ({selectedDayIncome.length})
               </h3>
               {selectedDayIncome.length === 0 ? (
-                <p className="mt-2 text-sm text-slate-500">No income for this day.</p>
+                <p className="mt-2 text-xs text-slate-500 md:text-sm">No income for this day.</p>
               ) : (
-                <ol className="mt-2 space-y-2">
+                <ol className="mt-2 space-y-1.5">
                   {selectedDayIncome.map((item, index) => (
                     <li
                       key={item.id}
-                      className="rounded-lg border border-emerald-100 bg-white p-2 text-sm"
+                      className="rounded-lg border border-emerald-100 bg-white p-2 text-xs"
                     >
-                      <p className="font-semibold text-slate-800">
-                        {index + 1}. {item.categories?.name || "Uncategorized"} -{" "}
-                        <span className="text-emerald-700">{formatCurrency(item.amount)}</span>
+                      <p className="font-semibold text-emerald-700">{formatCurrency(item.amount)}</p>
+                      <p className="mt-0.5 font-medium text-slate-800">
+                        {index + 1}. {item.categories?.name || "Uncategorized"}
                       </p>
-                      <p className="text-xs text-slate-600">Time: {formatTimeOnly(item.transaction_at)}</p>
-                      <p className="text-xs text-slate-600">
-                        Added By: {item.added_by || item.entered_by_name || "-"}
-                      </p>
-                      {item.note ? <p className="text-xs text-slate-600">Note: {item.note}</p> : null}
+                      <div className="mt-1 flex flex-wrap items-center gap-1">
+                        <span
+                          className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold ring-1 ${getPersonBadgeClass(item)}`}
+                        >
+                          {getPersonLabel(item)}
+                        </span>
+                        <span className="text-[10px] text-slate-500">
+                          {formatTimeOnly(item.transaction_at)}
+                        </span>
+                      </div>
                     </li>
                   ))}
                 </ol>
