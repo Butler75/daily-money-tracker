@@ -6,7 +6,6 @@ import { formatCurrency } from "../lib/format";
 import {
   DUBAI_TIMEZONE,
   getDubaiNow,
-  isDateInPeriod,
   toDubaiDateTime,
 } from "../lib/date";
 import { DateTime } from "luxon";
@@ -61,6 +60,8 @@ export function DashboardPage() {
   const [selectedDateKey, setSelectedDateKey] = useState("");
   const now = getDubaiNow();
   const activeMonth = now.startOf("month");
+  const todayKey = now.toFormat("yyyy-LL-dd");
+  const monthKey = now.toFormat("yyyy-LL");
 
   const fetchDashboardTransactions = useCallback(async () => {
     if (!supabase) return;
@@ -68,9 +69,19 @@ export function DashboardPage() {
     setError("");
 
     const { data, error: queryError } = await supabase
-      .schema("public")
       .from("transactions")
-      .select("id,type,amount,payment_method,note,transaction_at,entered_by_name,categories(name)")
+      .select(`
+        id,
+        type,
+        amount,
+        payment_method,
+        note,
+        transaction_at,
+        entered_by_name,
+        categories (
+          name
+        )
+      `)
       .order("transaction_at", { ascending: false });
 
     if (queryError) {
@@ -89,18 +100,20 @@ export function DashboardPage() {
   }, [fetchDashboardTransactions]);
 
   const todayStats = useMemo(() => {
-    const todayTransactions = transactions.filter((item) =>
-      isDateInPeriod(item.transaction_at, "today")
-    );
+    const todayTransactions = transactions.filter((item) => {
+      const date = toDubaiDateTime(item.transaction_at);
+      return date?.toFormat("yyyy-LL-dd") === todayKey;
+    });
     return summarize(todayTransactions);
-  }, [transactions]);
+  }, [todayKey, transactions]);
 
   const monthStats = useMemo(() => {
-    const monthTransactions = transactions.filter((item) =>
-      isDateInPeriod(item.transaction_at, "month")
-    );
-    return summarize(monthTransactions);
-  }, [transactions]);
+    const monthRows = transactions.filter((item) => {
+      const date = toDubaiDateTime(item.transaction_at);
+      return date?.toFormat("yyyy-LL") === monthKey;
+    });
+    return summarize(monthRows);
+  }, [monthKey, transactions]);
 
   const monthTransactions = useMemo(
     () =>
@@ -171,6 +184,9 @@ export function DashboardPage() {
           {error}
         </p>
       ) : null}
+      <p className="text-sm font-semibold text-slate-600">
+        Loaded transactions: {transactions.length}
+      </p>
 
       <section className="grid grid-cols-2 gap-3">
         <StatCard
