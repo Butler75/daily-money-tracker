@@ -18,7 +18,9 @@ export function Layout({ title, subtitle, children }) {
   const visibleNavItems = navItems.filter(
     (item) => !item.permission || permissions[item.permission]
   );
-  const mobileNavItems = visibleNavItems.filter((item) => item.to === "/settings");
+  const mobileNavItems = visibleNavItems.filter(
+    (item) => item.to === "/" || item.to === "/add-transaction"
+  );
   const frameClassName = hideNavigation
     ? "min-h-svh"
     : "app-frame";

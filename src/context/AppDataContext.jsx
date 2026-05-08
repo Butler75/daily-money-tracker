@@ -431,7 +431,7 @@ export function AppDataProvider({ children }) {
         type: payload.type,
         category_id: payload.category_id || payload.category || null,
         added_by: person,
-        payment_method: payload.payment_method || "Not Used",
+        payment_method: "Cash",
         note: payload.note || "",
         created_at: payload.created_at || new Date().toISOString(),
         transaction_at: payload.transaction_at,

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import { Layout } from "../components/Layout";
-import { EXPENSE_ADDED_BY_OPTIONS, PAYMENT_METHOD_OPTIONS } from "../constants";
+import { EXPENSE_ADDED_BY_OPTIONS } from "../constants";
 import { useAppData } from "../context/AppDataContext";
 import { SearchableCategorySelect } from "../components/SearchableCategorySelect";
 import {
@@ -23,7 +24,6 @@ export function AddTransactionPage() {
     amount: "",
     category_id: "",
     added_by: "",
-    payment_method: PAYMENT_METHOD_OPTIONS[0],
     note: "",
     transaction_at: getNowLocalISOString(),
   });
@@ -87,7 +87,6 @@ export function AddTransactionPage() {
       note: "",
       category_id: "",
       added_by: "",
-      payment_method: PAYMENT_METHOD_OPTIONS[0],
       transaction_at: getNowLocalISOString(),
     }));
   }
@@ -107,7 +106,6 @@ export function AddTransactionPage() {
         category_id: form.category_id,
         person: form.added_by,
         added_by: form.added_by,
-        payment_method: form.payment_method,
         note: form.note,
         created_at: new Date().toISOString(),
         transaction_at: dubaiDateTimeInputToUtcIso(form.transaction_at),
@@ -181,6 +179,13 @@ export function AddTransactionPage() {
         className="card space-y-4 pb-28 text-left"
         onSubmit={handleSubmit}
       >
+        <Link
+          to="/"
+          className="block w-full rounded-2xl bg-slate-900 px-4 py-4 text-center text-lg font-bold text-white"
+        >
+          ← Dashboard
+        </Link>
+
         <div>
           <label className="field-label">Type</label>
           <div className="grid grid-cols-2 gap-2">
@@ -256,21 +261,6 @@ export function AddTransactionPage() {
             onChange={(value) => updateField("category_id", value)}
             allowedType={form.type}
           />
-        </div>
-
-        <div>
-          <label className="field-label">Payment Method</label>
-          <select
-            className="input"
-            value={form.payment_method}
-            onChange={(event) => updateField("payment_method", event.target.value)}
-          >
-            {PAYMENT_METHOD_OPTIONS.map((method) => (
-              <option key={method} value={method}>
-                {method.toUpperCase()}
-              </option>
-            ))}
-          </select>
         </div>
 
         <div>
