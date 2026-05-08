@@ -11,7 +11,7 @@ export function SearchableCategorySelect({
   const filteredCategories = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
     return categories.filter((item) => {
-      const typeMatch = !allowedType || item.type === allowedType || item.type === "both";
+      const typeMatch = !allowedType || item.type === allowedType;
       const textMatch = item.name.toLowerCase().includes(normalizedQuery);
       return typeMatch && textMatch;
     });

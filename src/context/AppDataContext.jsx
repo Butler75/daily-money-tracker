@@ -427,6 +427,7 @@ export function AppDataProvider({ children }) {
     async (payload) => {
       const dataToInsert = {
         ...payload,
+        payment_method: "Not Used",
         entered_by: user.id,
         entered_by_name: profile?.full_name || user.email,
       };

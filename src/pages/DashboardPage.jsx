@@ -1,8 +1,9 @@
 import { useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { Layout } from "../components/Layout";
 import { StatCard } from "../components/StatCard";
 import { useAppData } from "../context/AppDataContext";
-import { formatCurrency, formatDateTime } from "../lib/format";
+import { formatCurrency } from "../lib/format";
 import {
   getDubaiNow,
   isDateInPeriod,
@@ -44,6 +45,12 @@ function getCalendarCells(activeMonth) {
     });
   }
   return cells;
+}
+
+function formatTimeOnly(dateIso) {
+  const dt = toDubaiDateTime(dateIso);
+  if (!dt) return "-";
+  return dt.toFormat("hh:mm a");
 }
 
 export function DashboardPage() {
@@ -115,6 +122,15 @@ export function DashboardPage() {
     return byDay.get(selectedDateKey) || { income: 0, expenses: 0, balance: 0, count: 0 };
   }, [byDay, selectedDateKey]);
 
+  const selectedDayExpenses = useMemo(
+    () => selectedDayTransactions.filter((item) => item.type === "expense"),
+    [selectedDayTransactions]
+  );
+  const selectedDayIncome = useMemo(
+    () => selectedDayTransactions.filter((item) => item.type === "income"),
+    [selectedDayTransactions]
+  );
+
   return (
     <Layout title="Dashboard" subtitle="Monthly business performance calendar">
       {error ? (
@@ -123,16 +139,18 @@ export function DashboardPage() {
         </p>
       ) : null}
 
-      <section className="grid grid-cols-1 gap-3 md:grid-cols-2">
+      <section className="grid grid-cols-2 gap-3">
         <StatCard
           label="Today Surplus / Deficit"
           value={todayStats.balance}
           tone={todayStats.balance >= 0 ? "positive" : "negative"}
+          signed
         />
         <StatCard
           label="Month-to-date Surplus / Deficit"
           value={monthStats.balance}
           tone={monthStats.balance >= 0 ? "positive" : "negative"}
+          signed
         />
         <StatCard
           label="Month-to-date Income"
@@ -144,6 +162,21 @@ export function DashboardPage() {
           value={monthStats.expenses}
           tone="negative"
         />
+      </section>
+
+      <section className="grid grid-cols-2 gap-3 md:hidden">
+        <Link
+          to="/"
+          className="rounded-2xl bg-slate-900 px-4 py-4 text-center text-base font-semibold text-white shadow-sm"
+        >
+          Dashboard
+        </Link>
+        <Link
+          to="/add-transaction"
+          className="rounded-2xl bg-emerald-600 px-4 py-4 text-center text-base font-semibold text-white shadow-sm"
+        >
+          Add
+        </Link>
       </section>
 
       <section className="card">
@@ -280,27 +313,62 @@ export function DashboardPage() {
           </div>
         ) : null}
 
-        <ul className="mt-3 space-y-2">
-          {selectedDayTransactions.map((item) => (
-            <li key={item.id} className="rounded-xl border border-slate-200 p-3">
-              <div className="flex items-center justify-between">
-                <p className="font-medium text-slate-800">
-                  {item.type.toUpperCase()} - {item.category?.name || "Uncategorized"}
-                </p>
-                <p className={item.type === "income" ? "text-emerald-600" : "text-rose-600"}>
-                  {formatCurrency(item.amount)}
-                </p>
-              </div>
-              <p className="mt-1 text-xs text-slate-500">
-                {formatDateTime(item.transaction_at)}
-              </p>
-              <p className="mt-1 text-xs text-slate-600">
-                Added By: {item.added_by || item.entered_by_name || "-"}
-              </p>
-              <p className="mt-1 text-xs text-slate-600">Note: {item.note || "-"}</p>
-            </li>
-          ))}
-        </ul>
+        {selectedDateKey ? (
+          <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2">
+            <article className="rounded-xl border border-rose-200 bg-rose-50/50 p-3">
+              <h3 className="text-sm font-semibold text-rose-700">
+                Expenses ({selectedDayExpenses.length})
+              </h3>
+              {selectedDayExpenses.length === 0 ? (
+                <p className="mt-2 text-sm text-slate-500">No expenses for this day.</p>
+              ) : (
+                <ol className="mt-2 space-y-2">
+                  {selectedDayExpenses.map((item, index) => (
+                    <li key={item.id} className="rounded-lg border border-rose-100 bg-white p-2 text-sm">
+                      <p className="font-semibold text-slate-800">
+                        {index + 1}. {item.category?.name || "Uncategorized"} -{" "}
+                        <span className="text-rose-700">{formatCurrency(item.amount)}</span>
+                      </p>
+                      <p className="text-xs text-slate-600">Time: {formatTimeOnly(item.transaction_at)}</p>
+                      <p className="text-xs text-slate-600">
+                        Added By: {item.added_by || item.entered_by_name || "-"}
+                      </p>
+                      {item.note ? <p className="text-xs text-slate-600">Note: {item.note}</p> : null}
+                    </li>
+                  ))}
+                </ol>
+              )}
+            </article>
+
+            <article className="rounded-xl border border-emerald-200 bg-emerald-50/50 p-3">
+              <h3 className="text-sm font-semibold text-emerald-700">
+                Income ({selectedDayIncome.length})
+              </h3>
+              {selectedDayIncome.length === 0 ? (
+                <p className="mt-2 text-sm text-slate-500">No income for this day.</p>
+              ) : (
+                <ol className="mt-2 space-y-2">
+                  {selectedDayIncome.map((item, index) => (
+                    <li
+                      key={item.id}
+                      className="rounded-lg border border-emerald-100 bg-white p-2 text-sm"
+                    >
+                      <p className="font-semibold text-slate-800">
+                        {index + 1}. {item.category?.name || "Uncategorized"} -{" "}
+                        <span className="text-emerald-700">{formatCurrency(item.amount)}</span>
+                      </p>
+                      <p className="text-xs text-slate-600">Time: {formatTimeOnly(item.transaction_at)}</p>
+                      <p className="text-xs text-slate-600">
+                        Added By: {item.added_by || item.entered_by_name || "-"}
+                      </p>
+                      {item.note ? <p className="text-xs text-slate-600">Note: {item.note}</p> : null}
+                    </li>
+                  ))}
+                </ol>
+              )}
+            </article>
+          </div>
+        ) : null}
       </section>
     </Layout>
   );

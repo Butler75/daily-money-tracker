@@ -13,7 +13,7 @@ function getNowLocalISOString() {
 }
 
 export function AddTransactionPage() {
-  const { categories, transactions, addTransaction } = useAppData();
+  const { categories, addTransaction } = useAppData();
   const amountInputRef = useRef(null);
   const formRef = useRef(null);
   const successTimerRef = useRef(null);
@@ -45,32 +45,8 @@ export function AddTransactionPage() {
 
   const hasValidAmount = useMemo(() => Number(form.amount) > 0, [form.amount]);
 
-  const hasValidAddedBy = form.type === "income" || Boolean(form.added_by);
+  const hasValidAddedBy = Boolean(form.added_by);
   const canSave = hasValidAmount && hasValidCategory && hasValidAddedBy && !saving;
-
-  const quickCategories = useMemo(() => {
-    const counts = new Map();
-
-    transactions
-      .filter((item) => item.type === form.type)
-      .forEach((item) => {
-        const categoryId = item.category_id;
-        if (!categoryId) return;
-        counts.set(categoryId, (counts.get(categoryId) || 0) + 1);
-      });
-
-    const rankedByUsage = availableCategories
-      .map((category) => ({
-        ...category,
-        usageCount: counts.get(category.id) || 0,
-      }))
-      .sort((a, b) => {
-        if (b.usageCount !== a.usageCount) return b.usageCount - a.usageCount;
-        return a.name.localeCompare(b.name);
-      });
-
-    return rankedByUsage.slice(0, 6);
-  }, [availableCategories, form.type, transactions]);
 
   const amountPreview = useMemo(() => {
     const numericValue = Number(form.amount || 0);
@@ -116,11 +92,6 @@ export function AddTransactionPage() {
 
   const submitTransaction = useCallback(async () => {
     if (!hasValidAmount || !hasValidCategory || !hasValidAddedBy || saving) {
-      setError(
-        form.type === "expense"
-          ? "Amount, category, and Added By are required for expenses."
-          : "Amount and category are required."
-      );
       return;
     }
 
@@ -131,7 +102,7 @@ export function AddTransactionPage() {
       await addTransaction({
         ...form,
         amount: Number(form.amount),
-        added_by: form.type === "expense" ? form.added_by : null,
+        added_by: form.added_by,
         transaction_at: dubaiDateTimeInputToUtcIso(form.transaction_at),
       });
       setShowSuccess(true);
@@ -180,13 +151,15 @@ export function AddTransactionPage() {
 
       if (event.key === "Enter" && activeTag !== "textarea") {
         event.preventDefault();
-        formRef.current?.requestSubmit();
+        if (canSave) {
+          formRef.current?.requestSubmit();
+        }
       }
     }
 
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, []);
+  }, [canSave]);
 
   useEffect(() => {
     return () => {
@@ -229,30 +202,28 @@ export function AddTransactionPage() {
           </div>
         </div>
 
-        {form.type === "expense" ? (
-          <div>
-            <label className="field-label">Added By</label>
-            <div className="grid grid-cols-2 gap-3">
-              {EXPENSE_ADDED_BY_OPTIONS.map((name) => (
-                <button
-                  key={name}
-                  type="button"
-                  onClick={() => updateField("added_by", name)}
-                  className={
-                    form.added_by === name
-                      ? name === "YASSAR"
-                        ? "rounded-2xl bg-blue-700 px-4 py-5 text-lg font-bold text-white shadow-md"
-                        : "rounded-2xl bg-emerald-700 px-4 py-5 text-lg font-bold text-white shadow-md"
-                      : "rounded-2xl border border-slate-300 bg-white px-4 py-5 text-lg font-bold text-slate-700"
-                  }
-                  aria-pressed={form.added_by === name}
-                >
-                  {name}
-                </button>
-              ))}
-            </div>
+        <div>
+          <label className="field-label">Added By</label>
+          <div className="grid grid-cols-2 gap-3">
+            {EXPENSE_ADDED_BY_OPTIONS.map((name) => (
+              <button
+                key={name}
+                type="button"
+                onClick={() => updateField("added_by", name)}
+                className={
+                  form.added_by === name
+                    ? name === "YASSAR"
+                      ? "rounded-2xl bg-blue-700 px-4 py-5 text-lg font-bold text-white shadow-md"
+                      : "rounded-2xl bg-emerald-700 px-4 py-5 text-lg font-bold text-white shadow-md"
+                    : "rounded-2xl border border-slate-300 bg-white px-4 py-5 text-lg font-bold text-slate-700"
+                }
+                aria-pressed={form.added_by === name}
+              >
+                {name}
+              </button>
+            ))}
           </div>
-        ) : null}
+        </div>
 
         <div>
           <label className="field-label">Amount</label>
@@ -266,7 +237,6 @@ export function AddTransactionPage() {
             placeholder="0.00"
             value={form.amount}
             onChange={(event) => updateField("amount", event.target.value)}
-            required
           />
           <p className="mt-2 text-sm font-medium text-slate-500">{amountPreview}</p>
         </div>
@@ -282,33 +252,12 @@ export function AddTransactionPage() {
         </div>
 
         <div>
-          <label className="field-label">Quick categories</label>
-          <div className="flex flex-wrap gap-2">
-            {quickCategories.map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                onClick={() => updateField("category_id", item.id)}
-                className={
-                  form.category_id === item.id
-                    ? "rounded-full bg-slate-900 px-3 py-2 text-sm font-semibold text-white"
-                    : "rounded-full border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700"
-                }
-              >
-                {item.name}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div>
           <label className="field-label">Date and time</label>
           <input
             className="input"
             type="datetime-local"
             value={form.transaction_at}
             onChange={(event) => updateField("transaction_at", event.target.value)}
-            required
           />
         </div>
 

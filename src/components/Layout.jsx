@@ -18,6 +18,7 @@ export function Layout({ title, subtitle, children }) {
   const visibleNavItems = navItems.filter(
     (item) => !item.permission || permissions[item.permission]
   );
+  const mobileNavItems = visibleNavItems.filter((item) => item.to === "/settings");
   const frameClassName = hideNavigation
     ? "min-h-svh"
     : "app-frame";
@@ -64,14 +65,14 @@ export function Layout({ title, subtitle, children }) {
         <nav className="fixed bottom-0 left-0 right-0 z-30 border-t border-slate-200 bg-white md:hidden">
           <ul
             className="mx-auto grid max-w-md"
-            style={{ gridTemplateColumns: `repeat(${visibleNavItems.length || 1}, minmax(0, 1fr))` }}
+            style={{ gridTemplateColumns: `repeat(${mobileNavItems.length || 1}, minmax(0, 1fr))` }}
           >
-            {visibleNavItems.map((item) => (
+            {mobileNavItems.map((item) => (
               <li key={item.to}>
                 <NavLink
                   to={item.to}
                   className={({ isActive }) =>
-                    `block px-1 py-2 text-center text-[11px] font-medium ${
+                    `block px-2 py-3 text-center text-sm font-semibold ${
                       isActive ? "text-slate-900" : "text-slate-500"
                     }`
                   }
