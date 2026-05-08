@@ -1,15 +1,16 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Layout } from "../components/Layout";
 import { StatCard } from "../components/StatCard";
-import { useAppData } from "../context/AppDataContext";
 import { formatCurrency } from "../lib/format";
 import {
+  DUBAI_TIMEZONE,
   getDubaiNow,
   isDateInPeriod,
   toDubaiDateTime,
 } from "../lib/date";
 import { DateTime } from "luxon";
+import { supabase } from "../lib/supabase";
 
 function summarize(records) {
   const income = records
@@ -54,10 +55,43 @@ function formatTimeOnly(dateIso) {
 }
 
 export function DashboardPage() {
-  const { transactions, loading, error } = useAppData();
+  const [transactions, setTransactions] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const [selectedDateKey, setSelectedDateKey] = useState("");
   const now = getDubaiNow();
   const activeMonth = now.startOf("month");
+
+  const fetchDashboardTransactions = useCallback(async () => {
+    if (!supabase) return;
+    setLoading(true);
+    setError("");
+
+    const monthStartUtc = activeMonth.startOf("month").setZone("utc").toISO();
+    const monthEndUtc = activeMonth.endOf("month").setZone("utc").toISO();
+
+    const { data, error: queryError } = await supabase
+      .schema("public")
+      .from("transactions")
+      .select("*, category:categories(name,type)")
+      .gte("transaction_at", monthStartUtc)
+      .lte("transaction_at", monthEndUtc)
+      .order("transaction_at", { ascending: false });
+
+    if (queryError) {
+      setTransactions([]);
+      setError(queryError.message || "Failed to load dashboard transactions");
+      setLoading(false);
+      return;
+    }
+
+    setTransactions(data || []);
+    setLoading(false);
+  }, [activeMonth]);
+
+  useEffect(() => {
+    fetchDashboardTransactions();
+  }, [fetchDashboardTransactions]);
 
   const todayStats = useMemo(() => {
     const todayTransactions = transactions.filter((item) =>
@@ -111,9 +145,12 @@ export function DashboardPage() {
 
   const selectedDayTransactions = useMemo(() => {
     if (!selectedDateKey) return [];
+    const selectedDubaiDate = DateTime.fromISO(selectedDateKey, { zone: DUBAI_TIMEZONE });
+    if (!selectedDubaiDate.isValid) return [];
+
     return monthTransactions.filter((item) => {
       const date = toDubaiDateTime(item.transaction_at);
-      return date && date.toFormat("yyyy-LL-dd") === selectedDateKey;
+      return date && date.hasSame(selectedDubaiDate, "day");
     });
   }, [monthTransactions, selectedDateKey]);
 
