@@ -1,0 +1,79 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color: #0f172a;
+    background-color: #f3f4f6;
+    font-family: "Inter", "Segoe UI", Roboto, sans-serif;
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100svh;
+    background: #f3f4f6;
+  }
+}
+
+@layer components {
+  .app-shell {
+    @apply mx-auto min-h-svh w-full max-w-[1280px] bg-white text-slate-900;
+  }
+
+  .app-frame {
+    @apply min-h-svh md:grid md:grid-cols-[240px_1fr] md:gap-0;
+  }
+
+  .desktop-sidebar {
+    @apply hidden h-svh border-r border-slate-200 bg-white px-4 py-6 md:sticky md:top-0 md:block;
+  }
+
+  .desktop-main {
+    @apply min-h-svh bg-slate-50;
+  }
+
+  .card {
+    @apply rounded-2xl border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/50;
+  }
+
+  .card-title {
+    @apply text-sm font-medium uppercase tracking-wide text-slate-500;
+  }
+
+  .field-label {
+    @apply mb-1 block text-sm font-medium text-slate-600;
+  }
+
+  .input {
+    @apply w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-slate-900 outline-none transition focus:border-slate-500 focus:ring-2 focus:ring-slate-300;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2.5 font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2.5 font-semibold text-slate-700 transition hover:bg-slate-100;
+  }
+
+  .money-display {
+    @apply text-4xl font-bold tracking-tight text-slate-900 md:text-5xl;
+  }
+
+  .nav-chip {
+    @apply rounded-xl border border-slate-200 px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-100 hover:text-slate-900;
+  }
+
+  .nav-chip-active {
+    @apply bg-slate-900 text-white hover:bg-slate-900 hover:text-white;
+  }
+}
