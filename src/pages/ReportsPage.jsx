@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 import { Layout } from "../components/Layout";
+import { CurrencyText } from "../components/CurrencyText";
 import { useAppData } from "../context/AppDataContext";
 import {
   getDubaiCustomRangeBounds,
@@ -305,13 +306,13 @@ export function ReportsPage() {
         <article className="card">
           <p className="card-title">Total Income</p>
           <p className="mt-2 text-3xl font-bold text-emerald-600">
-            {formatCurrency(report.totalIncome)}
+            <CurrencyText value={report.totalIncome} codeClassName="text-emerald-700" />
           </p>
         </article>
         <article className="card">
           <p className="card-title">Total Expenses</p>
           <p className="mt-2 text-3xl font-bold text-rose-600">
-            {formatCurrency(report.totalExpenses)}
+            <CurrencyText value={report.totalExpenses} codeClassName="text-rose-700" />
           </p>
         </article>
         <article className="card">
@@ -321,7 +322,11 @@ export function ReportsPage() {
               report.net >= 0 ? "text-emerald-600" : "text-rose-600"
             }`}
           >
-            {formatCurrency(report.net)}
+            <CurrencyText
+              value={report.net}
+              showPlus={report.net > 0}
+              codeClassName={report.net >= 0 ? "text-emerald-700" : "text-rose-700"}
+            />
           </p>
         </article>
       </section>
@@ -335,10 +340,18 @@ export function ReportsPage() {
               className="grid grid-cols-4 items-center gap-2 rounded-xl bg-slate-100 p-2 text-sm"
             >
               <p className="font-medium text-slate-700">{item.name}</p>
-              <p className="text-emerald-600">{formatCurrency(item.income)}</p>
-              <p className="text-rose-600">{formatCurrency(item.expenses)}</p>
+              <p className="text-emerald-600">
+                <CurrencyText value={item.income} codeClassName="text-emerald-700" />
+              </p>
+              <p className="text-rose-600">
+                <CurrencyText value={item.expenses} codeClassName="text-rose-700" />
+              </p>
               <p className={item.total >= 0 ? "font-semibold text-emerald-700" : "font-semibold text-rose-700"}>
-                {formatCurrency(item.total)}
+                <CurrencyText
+                  value={item.total}
+                  showPlus={item.total > 0}
+                  codeClassName={item.total >= 0 ? "text-emerald-700" : "text-rose-700"}
+                />
               </p>
             </li>
           ))}
@@ -357,10 +370,18 @@ export function ReportsPage() {
               className="grid grid-cols-4 items-center gap-2 rounded-xl border border-slate-200 p-2 text-sm"
             >
               <p className="font-medium text-slate-700">{item.date}</p>
-              <p className="text-emerald-600">{formatCurrency(item.income)}</p>
-              <p className="text-rose-600">{formatCurrency(item.expenses)}</p>
+              <p className="text-emerald-600">
+                <CurrencyText value={item.income} codeClassName="text-emerald-700" />
+              </p>
+              <p className="text-rose-600">
+                <CurrencyText value={item.expenses} codeClassName="text-rose-700" />
+              </p>
               <p className={item.net >= 0 ? "font-semibold text-emerald-700" : "font-semibold text-rose-700"}>
-                {formatCurrency(item.net)}
+                <CurrencyText
+                  value={item.net}
+                  showPlus={item.net > 0}
+                  codeClassName={item.net >= 0 ? "text-emerald-700" : "text-rose-700"}
+                />
               </p>
             </li>
           ))}
@@ -378,7 +399,11 @@ export function ReportsPage() {
               <div className="flex items-center justify-between text-xs text-slate-600">
                 <span>{item.date}</span>
                 <span className={item.net >= 0 ? "font-semibold text-emerald-700" : "font-semibold text-rose-700"}>
-                  {formatCurrency(item.net)}
+                  <CurrencyText
+                    value={item.net}
+                    showPlus={item.net > 0}
+                    codeClassName={item.net >= 0 ? "text-emerald-700" : "text-rose-700"}
+                  />
                 </span>
               </div>
               <div className="h-2 w-full rounded bg-slate-200">
@@ -405,7 +430,9 @@ export function ReportsPage() {
             <div key={item.name}>
               <div className="mb-1 flex items-center justify-between text-xs">
                 <span className="font-medium text-slate-700">{item.name}</span>
-                <span className="text-rose-700">{formatCurrency(item.expenses)}</span>
+                <span className="text-rose-700">
+                  <CurrencyText value={item.expenses} codeClassName="text-rose-700" />
+                </span>
               </div>
               <div className="h-2 w-full rounded bg-slate-200">
                 <div
@@ -431,7 +458,10 @@ export function ReportsPage() {
                   {item.category?.name || "Uncategorized"}
                 </p>
                 <p className={item.type === "income" ? "text-emerald-600" : "text-rose-600"}>
-                  {formatCurrency(item.amount)}
+                  <CurrencyText
+                    value={item.amount}
+                    codeClassName={item.type === "income" ? "text-emerald-700" : "text-rose-700"}
+                  />
                 </p>
               </div>
               <p className="mt-1 text-xs text-slate-500">

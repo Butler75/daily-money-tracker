@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Layout } from "../components/Layout";
+import { CurrencyText } from "../components/CurrencyText";
 import { StatCard } from "../components/StatCard";
-import { formatCurrency } from "../lib/format";
 import {
   DUBAI_TIMEZONE,
   getDubaiNow,
@@ -66,12 +66,6 @@ function getPersonBadgeClass(item) {
     return "bg-emerald-50 text-emerald-700 ring-emerald-200";
   }
   return "bg-slate-100 text-slate-700 ring-slate-200";
-}
-
-function normalizeNote(note) {
-  const raw = String(note || "").trim();
-  if (!raw) return "";
-  return raw.replace(/^\[Added By:\s*(YASSAR|ALEX)\]\s*/i, "").trim();
 }
 
 export function DashboardPage() {
@@ -196,7 +190,6 @@ export function DashboardPage() {
     () => selectedDayTransactions.filter((item) => item.type === "income"),
     [selectedDayTransactions]
   );
-  const latestSelectedDayTransaction = selectedDayTransactions[0] || null;
 
   return (
     <Layout title="Dashboard" subtitle="Monthly business performance calendar">
@@ -300,17 +293,21 @@ export function DashboardPage() {
               >
                 <p className="text-xs font-semibold text-slate-800">{cell.date.day}</p>
                 <p className="mt-1 text-[10px] font-medium text-emerald-600 md:text-xs">
-                  +{formatCurrency(summary.income)}
+                  <CurrencyText value={summary.income} showPlus codeClassName="text-emerald-700" />
                 </p>
                 <p className="text-[10px] font-medium text-rose-600 md:text-xs">
-                  -{formatCurrency(summary.expenses)}
+                  <CurrencyText value={summary.expenses} forceMinus codeClassName="text-rose-700" />
                 </p>
                 <p
                   className={`text-[10px] font-semibold md:text-xs ${
                     summary.balance >= 0 ? "text-emerald-700" : "text-rose-700"
                   }`}
                 >
-                  {formatCurrency(summary.balance)}
+                  <CurrencyText
+                    value={summary.balance}
+                    showPlus={summary.balance > 0}
+                    codeClassName={summary.balance >= 0 ? "text-emerald-700" : "text-rose-700"}
+                  />
                 </p>
                 <p className="mt-1 text-sm">{getEmojiForBalance(summary.balance)}</p>
 
@@ -319,17 +316,22 @@ export function DashboardPage() {
                     {DateTime.fromISO(dateKey).toFormat("dd LLL yyyy")}
                   </p>
                   <p className="mt-1 text-[11px] text-emerald-600">
-                    Income: {formatCurrency(summary.income)}
+                    Income: <CurrencyText value={summary.income} codeClassName="text-emerald-700" />
                   </p>
                   <p className="text-[11px] text-rose-600">
-                    Expense: {formatCurrency(summary.expenses)}
+                    Expense: <CurrencyText value={summary.expenses} codeClassName="text-rose-700" />
                   </p>
                   <p
                     className={`text-[11px] font-semibold ${
                       summary.balance >= 0 ? "text-emerald-700" : "text-rose-700"
                     }`}
                   >
-                    Net: {formatCurrency(summary.balance)}
+                    Net:{" "}
+                    <CurrencyText
+                      value={summary.balance}
+                      showPlus={summary.balance > 0}
+                      codeClassName={summary.balance >= 0 ? "text-emerald-700" : "text-rose-700"}
+                    />
                   </p>
                   <p className="text-[11px] text-slate-500">
                     Transactions: {summary.count}
@@ -365,13 +367,13 @@ export function DashboardPage() {
             <article className="rounded-xl bg-slate-100 p-2">
               <p className="text-[11px] uppercase text-slate-500">Income</p>
               <p className="font-semibold text-emerald-700">
-                {formatCurrency(selectedDaySummary.income)}
+                <CurrencyText value={selectedDaySummary.income} codeClassName="text-emerald-700" />
               </p>
             </article>
             <article className="rounded-xl bg-slate-100 p-2">
               <p className="text-[11px] uppercase text-slate-500">Expense</p>
               <p className="font-semibold text-rose-700">
-                {formatCurrency(selectedDaySummary.expenses)}
+                <CurrencyText value={selectedDaySummary.expenses} codeClassName="text-rose-700" />
               </p>
             </article>
             <article className="rounded-xl bg-slate-100 p-2">
@@ -381,7 +383,11 @@ export function DashboardPage() {
                   selectedDaySummary.balance >= 0 ? "text-emerald-700" : "text-rose-700"
                 }`}
               >
-                {formatCurrency(selectedDaySummary.balance)}
+                <CurrencyText
+                  value={selectedDaySummary.balance}
+                  showPlus={selectedDaySummary.balance > 0}
+                  codeClassName={selectedDaySummary.balance >= 0 ? "text-emerald-700" : "text-rose-700"}
+                />
               </p>
             </article>
           </div>
@@ -389,51 +395,19 @@ export function DashboardPage() {
 
         {selectedDateKey ? (
           <div className="mt-4 grid grid-cols-2 gap-2">
-            <article className="rounded-xl border border-slate-200 bg-slate-50 p-3 md:col-span-2">
-              <h3 className="text-sm font-semibold text-slate-800">Latest saved transaction</h3>
-              {latestSelectedDayTransaction ? (
-                <div className="mt-1 text-xs text-slate-700">
-                  <p className="font-semibold text-slate-800">
-                    {latestSelectedDayTransaction.categories?.name || "Uncategorized"} - {formatCurrency(latestSelectedDayTransaction.amount)}
-                  </p>
-                  <div className="mt-1 flex items-center gap-1">
-                    <span className="text-[10px] text-slate-500">
-                      {formatTimeOnly(latestSelectedDayTransaction.transaction_at)}
-                    </span>
-                    <span
-                      className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold ring-1 ${getPersonBadgeClass(
-                        latestSelectedDayTransaction
-                      )}`}
-                    >
-                      {getPersonLabel(latestSelectedDayTransaction)}
-                    </span>
-                  </div>
-                  {normalizeNote(latestSelectedDayTransaction.note) ? (
-                    <p className="mt-0.5 text-[10px] text-slate-500">
-                      {normalizeNote(latestSelectedDayTransaction.note)}
-                    </p>
-                  ) : null}
-                </div>
-              ) : (
-                <p className="mt-2 text-sm text-slate-500">
-                  No saved transactions for this selected day.
-                </p>
-              )}
-            </article>
-
-            <article className="rounded-xl border border-rose-200 bg-rose-50/50 p-3">
-              <h3 className="text-xs font-semibold text-rose-700 md:text-sm">
-                Expenses ({selectedDayExpenses.length})
+            <article className="rounded-xl border border-emerald-200 bg-emerald-50/50 p-2.5">
+              <h3 className="text-xs font-semibold text-emerald-700">
+                Income ({selectedDayIncome.length})
               </h3>
-              {selectedDayExpenses.length === 0 ? (
-                <p className="mt-2 text-xs text-slate-500 md:text-sm">No expenses for this day.</p>
+              {selectedDayIncome.length === 0 ? (
+                <p className="mt-1.5 text-xs text-slate-500">No income for this day.</p>
               ) : (
-                <ol className="mt-2 space-y-1.5">
-                  {selectedDayExpenses.map((item, index) => (
-                    <li key={item.id} className="rounded-lg border border-rose-100 bg-white p-2 text-xs">
+                <ol className="mt-1.5 space-y-1">
+                  {selectedDayIncome.map((item) => (
+                    <li key={item.id} className="rounded-lg border border-emerald-100 bg-white p-2 text-xs">
                       <p className="font-semibold text-slate-800">
-                        {index + 1}. {item.categories?.name || "Uncategorized"} -{" "}
-                        <span className="text-rose-700">{formatCurrency(item.amount)}</span>
+                        {item.categories?.name || "Uncategorized"} -{" "}
+                        <CurrencyText value={item.amount} codeClassName="text-emerald-700" />
                       </p>
                       <div className="mt-0.5 flex flex-wrap items-center gap-1">
                         <span className="text-[10px] text-slate-500">
@@ -451,22 +425,19 @@ export function DashboardPage() {
               )}
             </article>
 
-            <article className="rounded-xl border border-emerald-200 bg-emerald-50/50 p-3">
-              <h3 className="text-xs font-semibold text-emerald-700 md:text-sm">
-                Income ({selectedDayIncome.length})
+            <article className="rounded-xl border border-rose-200 bg-rose-50/50 p-2.5">
+              <h3 className="text-xs font-semibold text-rose-700">
+                Expenses ({selectedDayExpenses.length})
               </h3>
-              {selectedDayIncome.length === 0 ? (
-                <p className="mt-2 text-xs text-slate-500 md:text-sm">No income for this day.</p>
+              {selectedDayExpenses.length === 0 ? (
+                <p className="mt-1.5 text-xs text-slate-500">No expenses for this day.</p>
               ) : (
-                <ol className="mt-2 space-y-1.5">
-                  {selectedDayIncome.map((item, index) => (
-                    <li
-                      key={item.id}
-                      className="rounded-lg border border-emerald-100 bg-white p-2 text-xs"
-                    >
+                <ol className="mt-1.5 space-y-1">
+                  {selectedDayExpenses.map((item) => (
+                    <li key={item.id} className="rounded-lg border border-rose-100 bg-white p-2 text-xs">
                       <p className="font-semibold text-slate-800">
-                        {index + 1}. {item.categories?.name || "Uncategorized"} -{" "}
-                        <span className="text-emerald-700">{formatCurrency(item.amount)}</span>
+                        {item.categories?.name || "Uncategorized"} -{" "}
+                        <CurrencyText value={item.amount} codeClassName="text-rose-700" />
                       </p>
                       <div className="mt-0.5 flex flex-wrap items-center gap-1">
                         <span className="text-[10px] text-slate-500">

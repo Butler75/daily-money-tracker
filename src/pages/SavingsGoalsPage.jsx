@@ -1,7 +1,8 @@
 import { useMemo, useState } from "react";
+import { CurrencyText } from "../components/CurrencyText";
 import { Layout } from "../components/Layout";
 import { useAppData } from "../context/AppDataContext";
-import { formatCurrency, formatDateTime } from "../lib/format";
+import { formatDateTime } from "../lib/format";
 
 const initialForm = {
   name: "",
@@ -163,8 +164,8 @@ export function SavingsGoalsPage() {
                 <div>
                   <p className="font-semibold text-slate-900">{goal.name}</p>
                   <p className="text-xs text-slate-500">
-                    Target {formatCurrency(goal.target_amount)} | Alert at{" "}
-                    {formatCurrency(goal.alert_at_amount)}
+                    Target <CurrencyText value={goal.target_amount} /> | Alert at{" "}
+                    <CurrencyText value={goal.alert_at_amount} />
                   </p>
                 </div>
                 <button
