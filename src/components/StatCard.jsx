@@ -1,6 +1,12 @@
 import { formatCurrency } from "../lib/format";
 
-export function StatCard({ label, value, tone = "neutral", signed = false }) {
+export function StatCard({
+  label,
+  value,
+  tone = "neutral",
+  signed = false,
+  valueClassName = "",
+}) {
   const toneClasses = {
     positive: "text-emerald-600",
     negative: "text-rose-600",
@@ -15,7 +21,9 @@ export function StatCard({ label, value, tone = "neutral", signed = false }) {
   return (
     <article className="card p-3 md:p-5">
       <p className="card-title">{label}</p>
-      <p className={`mt-2 text-xl font-extrabold md:text-3xl ${toneClasses[tone]}`}>{displayValue}</p>
+      <p className={`mt-2 text-xl font-extrabold md:text-3xl ${toneClasses[tone]} ${valueClassName}`}>
+        {displayValue}
+      </p>
     </article>
   );
 }

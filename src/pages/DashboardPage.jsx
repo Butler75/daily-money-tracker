@@ -68,6 +68,12 @@ function getPersonBadgeClass(item) {
   return "bg-slate-100 text-slate-700 ring-slate-200";
 }
 
+function normalizeNote(note) {
+  const raw = String(note || "").trim();
+  if (!raw) return "";
+  return raw.replace(/^\[Added By:\s*(YASSAR|ALEX)\]\s*/i, "").trim();
+}
+
 export function DashboardPage() {
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -209,22 +215,26 @@ export function DashboardPage() {
           value={todayStats.balance}
           tone={todayStats.balance >= 0 ? "positive" : "negative"}
           signed
+          valueClassName="text-lg md:text-3xl"
         />
         <StatCard
           label="Month-to-date Surplus / Deficit"
           value={monthStats.balance}
           tone={monthStats.balance >= 0 ? "positive" : "negative"}
           signed
+          valueClassName="text-lg md:text-3xl"
         />
         <StatCard
           label="Month-to-date Income"
           value={monthStats.income}
           tone="positive"
+          valueClassName="text-lg md:text-3xl"
         />
         <StatCard
           label="Month-to-date Expense"
           value={monthStats.expenses}
           tone="negative"
+          valueClassName="text-lg md:text-3xl"
         />
       </section>
 
@@ -257,13 +267,13 @@ export function DashboardPage() {
           ))}
         </div>
 
-        <div className="mt-2 grid grid-cols-7 gap-1 md:gap-2">
+        <div className="mt-1 grid grid-cols-7 gap-0.5 md:gap-1.5">
           {calendarCells.map((cell) => {
             if (cell.isEmpty) {
               return (
                 <div
                   key={cell.key}
-                  className="min-h-[88px] rounded-xl border border-transparent bg-transparent md:min-h-[112px]"
+                  className="min-h-[70px] rounded-lg border border-transparent bg-transparent md:min-h-[98px]"
                 />
               );
             }
@@ -282,7 +292,7 @@ export function DashboardPage() {
                 key={cell.key}
                 type="button"
                 onClick={() => setSelectedDateKey(dateKey)}
-                className={`group relative min-h-[88px] rounded-xl border bg-white p-1.5 text-left transition md:min-h-[112px] md:p-2 ${
+                className={`group relative min-h-[70px] rounded-lg border bg-white p-1 text-left transition md:min-h-[98px] md:p-1.5 ${
                   isSelected
                     ? "border-slate-900 ring-1 ring-slate-900"
                     : "border-slate-200 hover:border-slate-400"
@@ -382,23 +392,25 @@ export function DashboardPage() {
             <article className="rounded-xl border border-slate-200 bg-slate-50 p-3 md:col-span-2">
               <h3 className="text-sm font-semibold text-slate-800">Latest saved transaction</h3>
               {latestSelectedDayTransaction ? (
-                <div className="mt-2 text-sm text-slate-700">
-                  <p className="font-semibold">
-                    {latestSelectedDayTransaction.categories?.name || "Uncategorized"} -{" "}
-                    {formatCurrency(latestSelectedDayTransaction.amount)}
+                <div className="mt-1 text-xs text-slate-700">
+                  <p className="font-semibold text-slate-800">
+                    {latestSelectedDayTransaction.categories?.name || "Uncategorized"} - {formatCurrency(latestSelectedDayTransaction.amount)}
                   </p>
-                  <p className="text-xs text-slate-600">
-                    Time: {formatTimeOnly(latestSelectedDayTransaction.transaction_at)}
-                  </p>
-                  <p className="text-xs text-slate-600">
-                    Added By:{" "}
-                    {latestSelectedDayTransaction.added_by ||
-                      latestSelectedDayTransaction.entered_by_name ||
-                      "-"}
-                  </p>
-                  {latestSelectedDayTransaction.note ? (
-                    <p className="text-xs text-slate-600">
-                      Note: {latestSelectedDayTransaction.note}
+                  <div className="mt-1 flex items-center gap-1">
+                    <span className="text-[10px] text-slate-500">
+                      {formatTimeOnly(latestSelectedDayTransaction.transaction_at)}
+                    </span>
+                    <span
+                      className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold ring-1 ${getPersonBadgeClass(
+                        latestSelectedDayTransaction
+                      )}`}
+                    >
+                      {getPersonLabel(latestSelectedDayTransaction)}
+                    </span>
+                  </div>
+                  {normalizeNote(latestSelectedDayTransaction.note) ? (
+                    <p className="mt-0.5 text-[10px] text-slate-500">
+                      {normalizeNote(latestSelectedDayTransaction.note)}
                     </p>
                   ) : null}
                 </div>
@@ -419,18 +431,18 @@ export function DashboardPage() {
                 <ol className="mt-2 space-y-1.5">
                   {selectedDayExpenses.map((item, index) => (
                     <li key={item.id} className="rounded-lg border border-rose-100 bg-white p-2 text-xs">
-                      <p className="font-semibold text-rose-700">{formatCurrency(item.amount)}</p>
-                      <p className="mt-0.5 font-medium text-slate-800">
-                        {index + 1}. {item.categories?.name || "Uncategorized"}
+                      <p className="font-semibold text-slate-800">
+                        {index + 1}. {item.categories?.name || "Uncategorized"} -{" "}
+                        <span className="text-rose-700">{formatCurrency(item.amount)}</span>
                       </p>
-                      <div className="mt-1 flex flex-wrap items-center gap-1">
+                      <div className="mt-0.5 flex flex-wrap items-center gap-1">
+                        <span className="text-[10px] text-slate-500">
+                          {formatTimeOnly(item.transaction_at)}
+                        </span>
                         <span
                           className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold ring-1 ${getPersonBadgeClass(item)}`}
                         >
                           {getPersonLabel(item)}
-                        </span>
-                        <span className="text-[10px] text-slate-500">
-                          {formatTimeOnly(item.transaction_at)}
                         </span>
                       </div>
                     </li>
@@ -452,18 +464,18 @@ export function DashboardPage() {
                       key={item.id}
                       className="rounded-lg border border-emerald-100 bg-white p-2 text-xs"
                     >
-                      <p className="font-semibold text-emerald-700">{formatCurrency(item.amount)}</p>
-                      <p className="mt-0.5 font-medium text-slate-800">
-                        {index + 1}. {item.categories?.name || "Uncategorized"}
+                      <p className="font-semibold text-slate-800">
+                        {index + 1}. {item.categories?.name || "Uncategorized"} -{" "}
+                        <span className="text-emerald-700">{formatCurrency(item.amount)}</span>
                       </p>
-                      <div className="mt-1 flex flex-wrap items-center gap-1">
+                      <div className="mt-0.5 flex flex-wrap items-center gap-1">
+                        <span className="text-[10px] text-slate-500">
+                          {formatTimeOnly(item.transaction_at)}
+                        </span>
                         <span
                           className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold ring-1 ${getPersonBadgeClass(item)}`}
                         >
                           {getPersonLabel(item)}
-                        </span>
-                        <span className="text-[10px] text-slate-500">
-                          {formatTimeOnly(item.transaction_at)}
                         </span>
                       </div>
                     </li>
