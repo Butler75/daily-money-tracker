@@ -36,6 +36,10 @@ export const DEFAULT_CATEGORIES = [
   { name: "Car Repair", type: "expense" },
   { name: "Car Loan", type: "expense" },
   { name: "TSB Loan", type: "expense" },
+  { name: "Loan", type: "expense" },
+  { name: "Groceries", type: "expense" },
+  { name: "Kids Allowance", type: "expense" },
+  { name: "Kids Activities", type: "expense" },
 ];
 
 export const REPORT_RANGE_OPTIONS = [

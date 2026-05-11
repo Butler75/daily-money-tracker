@@ -378,5 +378,9 @@ values
   ('Fuel Yassar', 'expense', '#64748b', true),
   ('Car Repair', 'expense', '#64748b', true),
   ('Car Loan', 'expense', '#64748b', true),
-  ('TSB Loan', 'expense', '#64748b', true)
+  ('TSB Loan', 'expense', '#64748b', true),
+  ('Loan', 'expense', '#64748b', true),
+  ('Groceries', 'expense', '#64748b', true),
+  ('Kids Allowance', 'expense', '#64748b', true),
+  ('Kids Activities', 'expense', '#64748b', true)
 on conflict (name) do nothing;
